@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Training Progress</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #plots, #examples { display: flex; flex-direction: column; align-items: center; }
+        img { max-width: 100%; height: auto; }
+    </style>
+    <script>
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('epoch').innerText = data.epoch;
+                    document.getElementById('train_loss').innerText = data.train_loss.slice(-1)[0].toFixed(4);
+                    document.getElementById('train_accuracy').innerText = data.train_accuracy.slice(-1)[0].toFixed(2) + '%';
+                    document.getElementById('test_accuracy').innerText = data.test_accuracy.slice(-1)[0].toFixed(2) + '%';
+                });
+
+            // Check if examples are received
+            fetch('/examples_received')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.examples_received) {
+                        document.getElementById('examples').style.display = 'block';
+                    }
+                });
+
+            // Refresh images
+            var plotImg = document.getElementById('plot_img');
+            plotImg.src = '/static/img/plot.png?rand=' + Math.random();
+
+            var examplesImg = document.getElementById('examples_img');
+            examplesImg.src = '/static/img/examples.png?rand=' + Math.random();
+        }
+
+        setInterval(fetchData, 1000);  // Poll every second
+    </script>
+</head>
+<body onload="fetchData()">
+    <h1>Training Progress</h1>
+    <p>Epoch: <span id="epoch">0</span></p>
+    <p>Training Loss: <span id="train_loss">0</span></p>
+    <p>Training Accuracy: <span id="train_accuracy">0%</span></p>
+    <p>Test Accuracy: <span id="test_accuracy">0%</span></p>
+
+    <div id="plots">
+        <h2>Loss and Accuracy Curves</h2>
+        <img id="plot_img" src="/static/img/plot.png" alt="Loss and Accuracy Plot">
+    </div>
+
+    <div id="examples" style="display:none;">
+        <h2>Sample Predictions</h2>
+        <img id="examples_img" src="/static/img/examples.png" alt="Sample Predictions">
+    </div>
+</body>
+</html>
+
